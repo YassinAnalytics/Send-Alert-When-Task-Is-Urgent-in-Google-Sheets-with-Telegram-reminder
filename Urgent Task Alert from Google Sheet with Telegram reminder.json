@@ -1,0 +1,599 @@
+{
+  "name": "Urgent Task Alert from Google Sheet with Telegram reminder copy",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Required\n\n• Google sheets credential\n• Gmail credential\n• Telegram account\n• Jira Credentials",
+        "height": 176,
+        "width": 304,
+        "color": 3
+      },
+      "id": "2145dd26-6680-4531-bc9c-2d1c854280e8",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        -432
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Trigger & Filtering\n\nTrigger:\n- Google Sheets Trigger (on change in “Priority” column)\n\nData Filtering:\n- Use IF node to keep only:\n- Priority = \"Urgent\"\n\nBest Practice:\n- Always validate fields at this step.\n- It ensures emails are only sent when data is complete and prevents errors in updates later.",
+        "height": 832,
+        "width": 432
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        208,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "098c286c-ab03-4647-bc7e-a5011b51debd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2) Send Email\n\nEmail Node:\n- Personalized message with:\n- Task name\n- Owner\n- Deadline\n- Status\n- Action required\n\n\nBest Practice:\n- Use line breaks (\\n) for formatting in email body.\n- Personalize subject and content to improve clarity and responsiveness.\n- Change the status of \"priority\" field so you don't get the email again",
+        "height": 832,
+        "width": 400,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        656,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "694c1d04-728c-4f33-ae28-540af4689497",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "sendTo": "youremail@gmail.com",
+        "subject": "A critical task has been flagged in the project sheet",
+        "message": "=Hi,<br><br>\nA task has been marked as <b>Urgent</b> in the project tracking sheet.<br><br>\n📌 <b>Task:</b> {{$json[\"Task\"]}}<br>\n👤 <b>Owner:</b> {{$json[\"Owner\"]}}<br>\n📅 <b>Deadline:</b> {{$json[\"Deadline\"]}}<br>\n📋 <b>Status:</b> {{$json[\"Status\"]}}<br>\n🧭 <b>Next Step:</b> {{$json[\"Next step\"]}}<br><br>\nPlease review this task as soon as possible.<br><br>\n—<br>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        -32
+      ],
+      "id": "2fb75987-3151-4baf-a60a-12ba4763ba2e",
+      "name": "Email alert",
+      "webhookId": "2e825ad5-2285-4245-a1ce-d281300f071b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "id",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd3dbdbd-84b2-4a29-bc65-a0475de280bf",
+              "leftValue": "={{$json[\"Priority\"]}}",
+              "rightValue": "Urgent",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "08ebdbd4-fee6-4e96-a169-6b38a4499383",
+      "name": "Condition to send the email"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1a4_uY_GzzCkLRdF2yy9mT0TQj5bXsrxOBEWnGO68M9U",
+          "mode": "list",
+          "cachedResultName": "Reporting",
+          "cachedResultUrl": "yourdocurl"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "yourdocurl"
+        },
+        "options": {
+          "columnsToWatch": [
+            "Priority"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        256,
+        -16
+      ],
+      "id": "83340599-4450-4a29-a1ab-2be536069f08",
+      "name": "Trigger when Urgent status",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "id",
+          "name": "Google Sheets Trigger account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 3) Delay & Mark as Notified\n\nWait & Update Sheet\n\nWait Node:\n- Adds a short delay (e.g., 2 hours) before re-checking task status\n\nUpdate Row Node:\n- Marks the task as \"Notified = Yes\"\n- Optionally store timestamp for traceability\n\nBest Practice:\n- Keeps notifications unique (no duplicates)\n- Makes workflow state-aware for next checks",
+        "height": 832,
+        "width": 336,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "48159164-cd09-47b3-8577-41afdcde99c7",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## 4) Escalate via Telegram \n\nEscalate if Still Urgent\n\nIF Node:\n- Checks if Priority = \"Urgent\"\n- Checks if Notified = \"Yes\" (still not resolved)\n\nTelegram Node:\n- Sends a reminder message if task remains open\n- Includes task, owner, and deadline info\n\nBest Practice:\n- Prevents missed critical tasks\n- Ideal for real-time team follow-up",
+        "height": 832,
+        "width": 528,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "ff5f361e-527e-4a47-b816-bcd290e97e7e",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1a4_uY_GzzCkLRdF2yy9mT0TQj5bXsrxOBEWnGO68M9U",
+          "mode": "list",
+          "cachedResultName": "Reporting",
+          "cachedResultUrl": "yourdocurl"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "yourdocurl"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Notified": "Yes",
+            "row_number": "=\n",
+            "Priority": "={{ $('Trigger when Urgent status').item.json.Priority }}"
+          },
+          "matchingColumns": [
+            "Priority"
+          ],
+          "schema": [
+            {
+              "id": "Task",
+              "displayName": "Task",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Owner",
+              "displayName": "Owner",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Deadline",
+              "displayName": "Deadline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Next step",
+              "displayName": "Next step",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Priority",
+              "displayName": "Priority",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notified",
+              "displayName": "Notified",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        -32
+      ],
+      "id": "a1a3d3a6-bc68-451b-8e4f-55d4714414f7",
+      "name": "Notified update",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "id",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1296,
+        112
+      ],
+      "id": "660783e5-f571-4503-945c-a85c69f6fe4b",
+      "name": "Waiting before check",
+      "webhookId": "webhook id",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "33799756-717a-4b03-8694-77f46be10988",
+              "leftValue": "Priority",
+              "rightValue": "=Urgent",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1536,
+        112
+      ],
+      "id": "fda23ffa-dd2b-43bd-964d-56a14ee456b4",
+      "name": "Check if task is dealt with"
+    },
+    {
+      "parameters": {
+        "chatId": "yourchatID",
+        "text": "=🚨 Task still open after 2h:\n📌 {{ $('Trigger when Urgent status').item.json.Task }}\n👤 {{ $('Trigger when Urgent status').item.json.Owner }}\n📅 {{ $('Trigger when Urgent status').item.json.Deadline }}\nStatus:{{ $('Trigger when Urgent status').item.json.Status }}\nNext step: {{ $('Trigger when Urgent status').item.json[\"Next step\"] }}\n\nPlease review this task in Google Sheets.\n",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        128
+      ],
+      "id": "1d0305cf-5b5e-44b4-bf82-0564df6387b9",
+      "name": "Send the escalation message",
+      "webhookId": "webhook id",
+      "credentials": {
+        "telegramApi": {
+          "id": "id",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 5) Automatic Incident Creation (Jira)\n\nIf no action is taken after escalation, a Jira ticket is automatically created with Highest Priority.\n\nThis ensures the issue enters a formal workflow and becomes trackable.\n\n\nAfter creating the Jira ticket, a final message is sent to notify the team or channel of the escalation.",
+        "height": 832,
+        "width": 480,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1968,
+        -432
+      ],
+      "typeVersion": 1,
+      "id": "327e0a4c-dddd-4d17-a799-9fcb2805d92e",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "value": "10002",
+          "mode": "list",
+          "cachedResultName": "test2"
+        },
+        "issueType": {
+          "__rl": true,
+          "value": "10013",
+          "mode": "list",
+          "cachedResultName": "Bug"
+        },
+        "summary": "={{ $('Trigger when Urgent status').item.json.Task }}",
+        "additionalFields": {
+          "description": "={{ $('Trigger when Urgent status').item.json.Task }}\n\nDeadline: {{ $('Trigger when Urgent status').item.json.Deadline }}\n\n{{ $('Trigger when Urgent status').item.json.Priority }}\n\n",
+          "priority": {
+            "__rl": true,
+            "value": "1",
+            "mode": "list",
+            "cachedResultName": "Highest"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [
+        2000,
+        128
+      ],
+      "id": "fcc85a8e-e191-412c-9cb1-b0d6f0878680",
+      "name": "Jira ticket creation",
+      "credentials": {
+        "jiraSoftwareCloudApi": {
+          "id": "id",
+          "name": "Jira SW Cloud account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "yourchatid",
+        "text": "=Now a ticket has been created in Jira.\n\nKey: {{ $json.key }}\nPlease check the ticket:{{ $json.self }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2208,
+        128
+      ],
+      "id": "ec86feca-c7a1-4992-8afe-854a2df2f9f9",
+      "name": "Send notification of the escalation",
+      "webhookId": "webhook id",
+      "credentials": {
+        "telegramApi": {
+          "id": "id",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Email alert": {
+      "main": [
+        [
+          {
+            "node": "Notified update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Condition to send the email": {
+      "main": [
+        [
+          {
+            "node": "Email alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger when Urgent status": {
+      "main": [
+        [
+          {
+            "node": "Condition to send the email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notified update": {
+      "main": [
+        [
+          {
+            "node": "Waiting before check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Waiting before check": {
+      "main": [
+        [
+          {
+            "node": "Check if task is dealt with",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if task is dealt with": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send the escalation message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send the escalation message": {
+      "main": [
+        [
+          {
+            "node": "Jira ticket creation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira ticket creation": {
+      "main": [
+        [
+          {
+            "node": "Send notification of the escalation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "40694ebc-193c-4dd5-b1bb-83f17d7d1613",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0430772da25f7bca29bf5ef2b251086a85fb4096503a6f781526d32befd038d6"
+  },
+  "id": "LG3vspcxyBA5aLjA",
+  "tags": [
+    {
+      "createdAt": "2025-08-18T07:16:22.756Z",
+      "updatedAt": "2025-08-18T07:16:22.756Z",
+      "id": "7zEwLFClveXBEcdb",
+      "name": "google sheet"
+    },
+    {
+      "createdAt": "2025-09-10T10:47:53.750Z",
+      "updatedAt": "2025-09-10T10:47:53.750Z",
+      "id": "EYNbAs3Q9sg9NksG",
+      "name": "Jira"
+    },
+    {
+      "createdAt": "2025-08-18T07:15:32.474Z",
+      "updatedAt": "2025-08-18T07:15:32.474Z",
+      "id": "NHXBM92Ov3ReuEwb",
+      "name": "Bot"
+    },
+    {
+      "createdAt": "2025-08-18T07:15:32.499Z",
+      "updatedAt": "2025-08-18T07:15:32.499Z",
+      "id": "bg5CwpF83fBHrGAh",
+      "name": "Productivity"
+    },
+    {
+      "createdAt": "2025-08-18T07:16:22.709Z",
+      "updatedAt": "2025-08-18T07:16:22.709Z",
+      "id": "eAzNESqLUWwWMrE9",
+      "name": "gmail"
+    },
+    {
+      "createdAt": "2025-08-18T07:15:32.509Z",
+      "updatedAt": "2025-08-18T07:15:32.509Z",
+      "id": "rxAyGkI20zmjETSb",
+      "name": "Telegram"
+    }
+  ]
+}
