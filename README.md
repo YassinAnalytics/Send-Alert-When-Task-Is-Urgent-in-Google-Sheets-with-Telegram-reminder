@@ -1,0 +1,2 @@
+# Send-Alert-When-Task-Is-Urgent-in-Google-Sheets-with-Telegram-reminder
+This workflow sends an instant email alert when a task in a Google Sheet is marked as Urgent, and then sends a Telegram reminder notification after 2 hours if the task still hasn’t been updated. Then a Jira ticket is created so the task enters in the formal workflow and another Telegram message is sent with the details of the issue created.
